@@ -4,3 +4,5 @@ mod interfaces;
 pub mod nft;
 pub mod main;
 pub mod token;
+pub mod staking;
+
