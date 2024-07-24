@@ -11,7 +11,9 @@ pub trait IMainNft<TContractState> {
 
 #[starknet::contract]
 pub mod MyToken {
-    use openzeppelin::access::ownable::OwnableComponent;
+    use core::option::OptionTrait;
+use core::traits::TryInto;
+use openzeppelin::access::ownable::OwnableComponent;
     use openzeppelin::introspection::src5::SRC5Component;
     use openzeppelin::token::erc721::ERC721Component;
     use openzeppelin::token::erc721::ERC721HooksEmptyImpl;
@@ -54,8 +56,10 @@ pub mod MyToken {
     }
 
     #[constructor]
-    fn constructor(ref self: ContractState, name: ByteArray, symbol: ByteArray) {
+    fn constructor(ref self: ContractState) {
         let base_uri = format!("{:?}", get_caller_address());
+        let  name: ByteArray = "TNFT";
+        let symbol: ByteArray = "TFT";
         self.erc721.initializer(name, symbol, base_uri);
         self.ownable.initializer(get_caller_address());
     }

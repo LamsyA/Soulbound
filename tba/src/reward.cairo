@@ -2,11 +2,12 @@
 // Compatible with OpenZeppelin Contracts for Cairo ^0.14.0
 
 #[starknet::contract]
-mod MyToken {
+mod RewardToken {
     use openzeppelin::access::ownable::OwnableComponent;
     use openzeppelin::token::erc20::ERC20Component;
     use openzeppelin::token::erc20::ERC20HooksEmptyImpl;
-    use starknet::ContractAddress;
+    use starknet::{ContractAddress,get_caller_address};
+    
 
     component!(path: ERC20Component, storage: erc20, event: ERC20Event);
     component!(path: OwnableComponent, storage: ownable, event: OwnableEvent);
@@ -39,7 +40,7 @@ mod MyToken {
 
     #[constructor]
     fn constructor(ref self: ContractState, owner: ContractAddress) {
-        self.erc20.initializer("Rewards, "rwd");
+        self.erc20.initializer("Rewards", "rwd");
         self.owner.write(owner);
     }
 
