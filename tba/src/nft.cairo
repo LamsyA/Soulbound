@@ -6,7 +6,7 @@ use starknet::ContractAddress;
 pub trait IMainNft<TContractState> {
     fn mint(ref self: TContractState, metadata: NFTMetadata, receiver: starknet::ContractAddress);
     fn update_main_contract_addr(ref self: TContractState, main: ContractAddress);
-    fn get_meta_data_by_id(ref self: TContractState, token_id : felt252)-> NFTMetadata;
+    fn get_meta_data_by_id(ref self: TContractState, token_id: felt252) -> NFTMetadata;
 }
 
 #[derive(Drop, Serde, PartialEq, starknet::Store)]
@@ -90,8 +90,8 @@ pub mod MyToken {
             self.main_addr.write(main);
         }
 
-        fn get_meta_data_by_id(ref self: ContractState, token_id : felt252)-> NFTMetadata{
-        self.nfts.read(token_id)
+        fn get_meta_data_by_id(ref self: ContractState, token_id: felt252) -> NFTMetadata {
+            self.nfts.read(token_id)
         }
     }
 }

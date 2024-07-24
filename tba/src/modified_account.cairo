@@ -19,7 +19,7 @@ mod ModifiedAccount {
 
     #[abi(embed_v0)]
     impl AccountImpl = AccountComponent::AccountImpl<ContractState>;
-    
+
     #[storage]
     struct Storage {
         #[substorage(v0)]
@@ -33,6 +33,4 @@ mod ModifiedAccount {
         #[flat]
         AccountEvent: AccountComponent::Event
     }
-
-
 }
