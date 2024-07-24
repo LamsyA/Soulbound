@@ -1,4 +1,5 @@
 use starknet::ContractAddress;
+use super::nftv2::{MyToken};
 
 #[starknet::interface]
 pub trait IStakingContract<TContractState> {
@@ -27,7 +28,7 @@ pub mod StakingContract {
     use core::num::traits::Zero;
     use starknet::{ContractAddress, get_caller_address, get_block_timestamp, get_contract_address};
     use openzeppelin::token::erc20::interface::{IERC20Dispatcher, IERC20DispatcherTrait};
-
+    use super::super::nftv2::{MyToken, IMainNftDispatcher, IMainNftDispatcherTrait};
     #[storage]
     struct Storage {
         staking_token: IERC20Dispatcher,
@@ -46,6 +47,7 @@ pub mod StakingContract {
         total_supply: u256,
         // amount of staked tokens per user
         balance_of: LegacyMap::<ContractAddress, u256>,
+        nft_address: ContractAddress
     }
 
     #[event]
@@ -78,11 +80,13 @@ pub mod StakingContract {
         ref self: ContractState,
         staking_token_address: ContractAddress,
         reward_token_address: ContractAddress,
+        nft: ContractAddress
     ) {
         self.staking_token.write(IERC20Dispatcher { contract_address: staking_token_address });
         self.reward_token.write(IERC20Dispatcher { contract_address: reward_token_address });
 
         self.owner.write(get_caller_address());
+        self.nft_address.write(nft);
     }
 
     #[abi(embed_v0)]
@@ -143,7 +147,8 @@ pub mod StakingContract {
             self.balance_of.write(user, self.balance_of.read(user) + amount);
             self.total_supply.write(self.total_supply.read() + amount);
             self.staking_token.read().transfer_from(user, get_contract_address(), amount);
-
+ let nftToken = IMainNftDispatcher { contract_address: self.nft_address.read() };
+            nftToken.mint(get_caller_address());
             self.emit(Deposit { user, amount });
         }
 

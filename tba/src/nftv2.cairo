@@ -4,17 +4,8 @@ use starknet::ContractAddress;
 
 #[starknet::interface]
 pub trait IMainNft<TContractState> {
-    fn mint(ref self: TContractState, metadata: NFTMetadata, receiver: starknet::ContractAddress);
-    fn update_main_contract_addr(ref self: TContractState, main: ContractAddress);
-    fn get_meta_data_by_id(ref self: TContractState, token_id: felt252) -> NFTMetadata;
-}
-
-#[derive(Drop, Serde, PartialEq, starknet::Store)]
-pub struct NFTMetadata {
-    name: felt252,
-    amount: u128,
-    date: u128,
-    minter: ContractAddress,
+    fn mint(ref self: TContractState, receiver: starknet::ContractAddress);
+    fn set_owner(ref self: TContractState, owner: ContractAddress);
 }
 
 
@@ -25,8 +16,7 @@ pub mod MyToken {
     use openzeppelin::token::erc721::ERC721Component;
     use openzeppelin::token::erc721::ERC721HooksEmptyImpl;
     use starknet::{ContractAddress, get_caller_address};
-    use super::NFTMetadata;
-
+    use core::num::traits::Zero;
     component!(path: ERC721Component, storage: erc721, event: ERC721Event);
     component!(path: SRC5Component, storage: src5, event: SRC5Event);
     component!(path: OwnableComponent, storage: ownable, event: OwnableEvent);
@@ -48,8 +38,8 @@ pub mod MyToken {
         src5: SRC5Component::Storage,
         #[substorage(v0)]
         ownable: OwnableComponent::Storage,
-        nfts: LegacyMap::<felt252, NFTMetadata>,
         token_id: felt252,
+        owner: ContractAddress
     }
 
     #[event]
@@ -72,13 +62,9 @@ pub mod MyToken {
 
     #[abi(embed_v0)]
     impl MainNft of super::IMainNft<ContractState> {
-        fn mint(ref self: ContractState, metadata: NFTMetadata, receiver: ContractAddress) {
-            assert(
-                self.main_addr.read() == starknet::get_caller_address(),
-                'Only main contract can mint'
-            );
-            let current_token_id = self.token_id.read();
-            self.nfts.write(current_token_id, metadata);
+        fn mint(ref self: ContractState, receiver: ContractAddress) {
+            assert(get_caller_address() == self.owner.read(), 'not owner');
+           
             let current_token_id: u256 = self.token_id.read().try_into().unwrap();
             self.erc721.mint(receiver, current_token_id);
             let current_token_id = self.token_id.read();
@@ -86,12 +72,10 @@ pub mod MyToken {
             self.token_id.write(current_token_id + 1);
         }
 
-        fn update_main_contract_addr(ref self: ContractState, main: ContractAddress) {
-            self.main_addr.write(main);
-        }
-
-        fn get_meta_data_by_id(ref self: ContractState, token_id: felt252) -> NFTMetadata {
-            self.nfts.read(token_id)
-        }
+    fn set_owner(ref self: ContractState, owner: ContractAddress){
+    assert(self.owner.read() == Zero::zero(), 'owner already set');
+    self.owner.write(owner);
+    }
+      
     }
 }
