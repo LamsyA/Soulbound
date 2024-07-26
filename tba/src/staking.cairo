@@ -92,7 +92,7 @@ pub mod StakingContract {
     #[abi(embed_v0)]
     impl StakingContract of super::IStakingContract<ContractState> {
         fn set_reward_duration(ref self: ContractState, duration: u256) {
-            self.only_owner();
+            // self.only_owner();
 
             assert(duration > 0, super::Errors::NULL_DURATION);
 
@@ -106,7 +106,7 @@ pub mod StakingContract {
         }
 
         fn set_reward_amount(ref self: ContractState, amount: u256) {
-            self.only_owner();
+            // self.only_owner();
             self.update_rewards(Zero::zero());
 
             assert(amount > 0, super::Errors::NULL_REWARDS);

@@ -67,7 +67,7 @@ use openzeppelin::access::ownable::OwnableComponent;
     #[abi(embed_v0)]
     impl MainNft of super::IMainNft<ContractState> {
         fn mint(ref self: ContractState, receiver: ContractAddress) {
-            assert(get_caller_address() == self.owner.read(), 'not owner');
+            // assert(get_caller_address() == self.owner.read(), 'not owner');
            
             let current_token_id: u256 = self.token_id.read().try_into().unwrap();
             self.erc721.mint(receiver, current_token_id);
